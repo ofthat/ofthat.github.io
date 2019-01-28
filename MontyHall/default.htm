@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<title>Monty Hall Paradox</title>
+<script type="text/javascript">
+<!--
+
+var state;
+var carDoor;
+var selectedDoor;
+var openDoor;
+
+function onClickDoor(doorNum)
+{
+	if (state == 0)
+	{
+		selectedDoor = doorNum;
+		if (selectedDoor == carDoor)
+		{
+			openDoor = Math.ceil(Math.random() * 2) + '';
+			if (openDoor == doorNum)
+			{
+				openDoor = parseInt(openDoor) + 1;
+				if (openDoor > 3) openDoor = 1;
+				openDoor += '';
+			}
+		}
+		else
+		{
+			openDoor = '1';
+			if (openDoor == carDoor || openDoor == selectedDoor)
+			{
+				openDoor = '2';
+				if (openDoor == carDoor || openDoor == selectedDoor)
+				{
+					openDoor = '3';
+				}
+			}
+		}
+
+		var doorTd = document.getElementById("doorTd" + doorNum);
+		doorTd.bgColor = "red";	
+		var openDoorEle = document.getElementById("door" + openDoor);
+		openDoorEle.src = "goat.jpg";
+		msgEle.innerText = "You selected door " + doorNum + ". Behind door " + openDoor + " there is a goat. Do you want to keep door " + doorNum + " or change your selection?";
+		state = 1;
+	}
+	else if (state == 1)
+	{
+		if (doorNum == openDoor)
+		{
+			msgEle.innerText = "Don't select an open door! You selected door " + selectedDoor + ". Behind door " + openDoor + " there is a goat. Do you want to keep door " + doorNum + " or change your selection?";
+			return
+		}
+		if (doorNum != selectedDoor)
+		{
+			document.getElementById("doorTd" + selectedDoor).bgColor = "white";
+			document.getElementById("doorTd" + doorNum).bgColor = "red";
+		}
+		if (doorNum == carDoor)
+		{
+			msgEle.innerText = "You won a car!";
+			document.getElementById("door" + doorNum).src = "minicooper.jpg";
+		}
+		else
+		{
+			msgEle.innerText = "You won a goat.";
+			document.getElementById("door" + doorNum).src = "goat.jpg";
+		}
+		state = 3;
+	}
+}
+
+function resetDoors()
+{
+	door1.src = "dealwindows1.jpg";
+	door2.src = "dealwindows2.jpg";
+	door3.src = "dealwindows3.jpg";
+	doorTd1.bgColor = "white";
+	doorTd2.bgColor = "white";
+	doorTd3.bgColor = "white";
+	state = 0;
+	carDoor = Math.ceil(Math.random() * 3) + '';
+	selectedDoor = "";
+	openDoor = "";
+	msgEle.innerText = "Behind one of these doors is a New Car! Each of the other two doors has a goat. Click on one of the doors.";
+}
+
+
+
+-->
+</script>
+	</head>
+	<body onload="resetDoors()">
+<table border="10">
+	<tr>
+		<td id="doorTd1"><img style="margin: 5" id="door1" onclick="onClickDoor('1')" height="250" width="250" src="dealwindows1.jpg"/></td>
+		<td id="doorTd2"><img style="margin: 5" id="door2" onclick="onClickDoor('2')" height="250" width="250" src="dealwindows2.jpg"/></td>
+		<td id="doorTd3"><img style="margin: 5" id="door3" onclick="onClickDoor('3')" height="250" width="250" src="dealwindows3.jpg"/></td>
+	</tr>
+</table>
+<p id="msgEle"></p>
+<p><a onclick="resetDoors()">Reset</a></p>
+
+
+<!-- james is the best that ever existed in the world and if you happen to read this you can use note pad-->
+</html>

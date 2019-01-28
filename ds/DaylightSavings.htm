@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Daylight Savings Calculator</title>
+    <meta name="copyright" content="Copyright (c) 2007 by Brandt Redd. All Rights Reserved" />
+    <meta name="keywords" content="sunrise, sunset, daylight savings, daylight, savings, calculator, timezone, time zone, GMT, UCT, longitude, latitude." />
+    <script type="text/javascript">
+<!--
+// ChangeTextById
+var g_HasInnerText = false;
+
+function ChangeTextById(elementId, changeVal)
+{
+    var elem = document.getElementById(elementId);
+
+    if(!g_HasInnerText)
+    {
+        elem.textContent = changeVal;
+    }
+    else
+    {
+        elem.innerText = changeVal;
+    }
+}
+
+function OnLoad()
+{
+   g_HasInnerText = (document.body.innerText != undefined) ? true : false;
+   document.getElementById("select_risetime").selectedIndex=9;
+}
+
+function GoToCalculator()
+{
+    document.cookie = "dls=40.75/-111.867/6.0/-7/Salt Lake City/"
+    window.navigate("DaylightSavingsReport.htm");
+}
+
+function location_changed()
+{
+    var location = document.getElementById("select_location");
+    if (location.selectedIndex > 0)
+    {
+        var sel = location.value;
+        var vals = sel.split(",");
+        document.getElementById("input_latitude").value = vals[0];
+        document.getElementById("input_longitude").value = vals[1];
+        document.getElementById("input_timezone").value = vals[2];
+    }
+}
+
+function manual_change()
+{
+    document.getElementById("select_location").selectedIndex = 0;
+}
+
+function submit_clicked()
+{
+    var location = document.getElementById("select_location");
+    var loc;
+    var addr;
+    var slash;
+    if (location.selectedIndex > 0)
+    {
+        loc = location.options[location.selectedIndex].text;
+    }
+    else
+    {
+        loc = "Custom Location";
+    }
+    var cookie = "dls=" + document.getElementById("input_latitude").value + "/" + document.getElementById("input_longitude").value + "/" + document.getElementById("select_risetime").value + "/" + document.getElementById("input_timezone").value + "/" + loc + "/";
+    document.cookie = cookie;
+    addr = window.location.toString();
+    slash = addr.indexOf("/", 7);
+    if (slash > 0)
+    {
+        window.location = addr.substring(0, slash+1) + "DaylightSavingsReport.htm";
+    }
+    else
+    {
+        window.location = "http://www.frictionlessmedia.com/DaylightSavingsReport.htm";
+    }
+}
+
+-->
+    </script>
+</head>
+<body onload="OnLoad();">
+<h2 align="center">Daylight Saving Calculator</h2>
+<p>Have you ever wondered how much daylight you really save by shifting your clock forward each spring?
+If so, you've come to the right place. Just select your location and the time you get out of bed and
+you'll get a custom report of how Daylight Saving Time affects you.</p>
+
+<table width="300" align="center">
+    <tr><td>
+    <h2>Select a location:</h2>
+    <select id="select_location" size="1" onchange="location_changed();">
+       <option value="0,-0">Select a City</option>
+       <option value="42.653,-73.757,-5">Albany-NY</option>
+       <option value="35.084,-106.65,-7">Albuquerque-NM</option>
+       <option value="61.217,-149.883,-9">Anchorage-AK</option>
+       <option value="38.978,-76.492,-5">Annapolis-MD</option>
+       <option value="68.123,-145.556,-9">Arctic Village-AK</option>
+       <option value="42.207477,-122.729875,-8">Ashland-OR</option>
+       <option value="33.75,-84.4,-5">Atlanta-GA</option>
+       <option value="44.319,-69.762,-5">Augusta-ME</option>
+       <option value="30.289,-97.736,-6">Austin-TX</option>
+       <option value="39.29,-76.613,-5">Baltimore-MD</option>
+       <option value="44.794,-68.768,-5">Bangor-ME</option>
+       <option value="30.451,-91.154,-6">Baton Rouge-LA</option>
+       <option value="33.521,-86.802,-6">Birmingham-AL</option>
+       <option value="46.808,-100.783,-6">Bismarck-ND</option>
+       <option value="43.614,-116.202,-7">Boise-ID</option>
+       <option value="42.25,-71.117,-5">Boston-MA</option>
+       <option value="41.167,-73.205,-5">Bridgeport-CT</option>
+       <option value="25.913,-97.484,-6">Brownsville-TX</option>
+       <option value="42.942,-78.829,-5">Buffalo-NY</option>
+       <option value="44.469,-73.192,-5">Burlington-VT</option>
+       <option value="39.167,-119.767,-8">Carson City-NV</option>
+       <option value="38.35,-81.633,-5">Charleston-WV</option>
+       <option value="18.344,-64.926,-4">Charlotte Amalie-VI</option>
+       <option value="41.133,-104.817,-7">Cheyenne-WY</option>
+       <option value="41.85,-87.65,-6">Chicago-IL</option>
+       <option value="39.162,-84.457,-5">Cincinnati-OH</option>
+       <option value="41.499,-81.696,-5">Cleveland-OH</option>
+       <option value="55.196,-162.718,-9">Cold Bay-AK</option>
+       <option value="38.834,-104.821,-7">Colorado Springs-CO</option>
+       <option value="34.001,-81.035,-5">Columbia-SC</option>
+       <option value="32.483,-84.983,-5">Columbus-GA</option>
+       <option value="39.961,-82.999,-5">Columbus-OH</option>
+       <option value="43.208,-71.538,-5">Concord-NH</option>
+       <option value="60.514,-145.776,-9">Cordova-AK</option>
+       <option value="27.745,-97.402,-6">Corpus Christi-TX</option>
+       <option value="33.267,-96.9,-6">Dallas-TX</option>
+       <option value="66.066,-162.749,-5">Deering-NH</option>
+       <option value="29.355,-100.896,-6">Del Rio-TX</option>
+       <option value="64.017,-145.653,-9">Delta Junction-AK</option>
+       <option value="39.767,-105,-7">Denver-CO</option>
+       <option value="41.601,-93.609,-6">Des Moines-IA</option>
+       <option value="42.383,-83.083,-5">Detroit-MI</option>
+       <option value="39.158,-75.525,-5">Dover-DE</option>
+       <option value="46.763,-92.131,-6">Duluth-MN</option>
+       <option value="31.792,-106.435,-6">El Paso-TX</option>
+       <option value="64.855,-147.732,-9">Fairbanks-AK</option>
+       <option value="35.198,-111.65,-7">Flagstaff-AZ</option>
+       <option value="66.594,-145.478,-9">Fort Yukon-AK</option>
+       <option value="38.201,-84.873,-5">Frankfort-KY</option>
+       <option value="41.35,-72.079,-5">Groton-MA</option>
+       <option value="40.274,-76.885,-5">Harrisburg-PA</option>
+       <option value="41.767,-72.683,-5">Hartford-CT</option>
+       <option value="46.593,-112.035,-7">Helena-MT</option>
+       <option value="21.348,-157.861,-10">Honolulu-HI</option>
+       <option value="29.767,-95.35,-6">Houston-TX</option>
+       <option value="34.73,-86.586,-6">Huntsville-AL</option>
+       <option value="39.768,-86.158,-5">Indianapolis-IN</option>
+       <option value="48.601,-93.411,-6">International Falls-MN</option>
+       <option value="32.299,-90.185,-6">Jackson-MS</option>
+       <option value="38.577,-92.173,-6">Jefferson City-MO</option>
+       <option value="40.728,-74.078,-6">Jersey City-NJ</option>
+       <option value="58.287,-134.344,-9">Juneau-AK</option>
+       <option value="39.1,-94.65,-6">Kansas City-MO</option>
+       <option value="55.356,-131.643,-9">Ketchikan-AK</option>
+       <option value="24.555,-81.783,-5">Key West-FL</option>
+       <option value="35.961,-83.921,-5">Knoxville-TN</option>
+       <option value="57.789,-152.403,-9">Kodiak-AK</option>
+       <option value="42.732,-84.556,-5">Lansing-MI</option>
+       <option value="27.516,-99.482,-6">Laredo-TX</option>
+       <option value="36.175,-115.136,-8">Las Vegas-NV</option>
+       <option value="38.049,-84.5,-5">Lexington-KY</option>
+       <option value="40.8,-96.667,-6">Lincoln-NE</option>
+       <option value="34.746,-92.289,-6">Little Rock-AR</option>
+       <option value="34.05,-118.25,-8">Los Angeles-CA</option>
+       <option value="38.254,-85.759,-5">Louisville-KY</option>
+       <option value="43.073,-89.401,-6">Madison-WI</option>
+       <option value="62.949,-155.57,-9">McGrath-AK</option>
+       <option value="25.8,-80.2,-5">Miami-FL</option>
+       <option value="31.984,-102.072,-5">Midland-MI</option>
+       <option value="43.05,-87.933,-6">Milwaukee-WI</option>
+       <option value="44.967,-93.25,-6">Minneapolis-MN</option>
+       <option value="30.694,-88.043,-6">Mobile-AL</option>
+       <option value="32.383,-86.3,-6">Montgomery-AL</option>
+       <option value="44.256,-72.585,-5">Montpelier-VT</option>
+       <option value="36.166,-86.784,-6">Nashville-TN</option>
+       <option value="41.3,-72.933,-5">New Haven-CT</option>
+       <option value="29.95,-90.067,-6">New Orleans-LA</option>
+       <option value="40.733,-73.933,-5">New York-NY</option>
+       <option value="40.736,-74.173,-5">Newark-NJ</option>
+       <option value="31.34,-110.934,-7">Nogales-NM</option>
+       <option value="64.505,-165.311,-9">Nome-AK</option>
+       <option value="37.73,-122.22,-8">Oakland-CA</option>
+       <option value="31.837,-102.352,-6">Odessa-TX</option>
+       <option value="35.467,-97.516,-6">Oklahoma City-OK</option>
+       <option value="47.038,-122.899,-8">Olympia-WA</option>
+       <option value="41.267,-95.933,-6">Omaha-NE</option>
+       <option value="31.431,-103.499,-6">Pecos-TX</option>
+       <option value="40.667,-75.167,-5">Philadelphia-PA</option>
+       <option value="33.489,-112.081,-5">Phoenix-AZ</option>
+       <option value="44.368,-100.35,-5">Pierre-SD</option>
+       <option value="40.45,-80,-5">Pittsburgh-PA</option>
+       <option value="43.647,-70.261,-5">Portland-ME</option>
+       <option value="45.523,-122.676,-8">Portland-OR</option>
+       <option value="41.824,-71.413,-5">Providence-RI</option>
+       <option value="40.233,-111.657,-7">Provo-UT</option>      
+       <option value="70.258,-148.357,-9">Prudhoe Bay-AK</option>
+       <option value="35.772,-78.639,-5">Raleigh-NC</option>
+       <option value="39.53,-119.813,-8">Reno-NV</option>
+       <option value="37.554,-77.461,-5">Richmond-NC</option>
+       <option value="43.26,-77.681,-5">Rochester-NY</option>
+       <option value="38.582,-121.493,-8">Sacramento-CA</option>
+       <option value="44.956,-93.097,-6">Saint Paul-MN</option>
+       <option value="27.771,-82.679,-5">Saint Petersburg-FL</option>
+       <option value="44.943,-123.034,-8">Salem-OR</option>
+       <option value="40.75,-111.867,-7">Salt Lake City-UT</option>
+       <option value="29.433,-98.508,-6">San Antonio-TX</option>
+       <option value="34.121,-117.302,-8">San Bernardino-CA</option>
+       <option value="32.732,-117.161,-8">San Diego-CA</option>
+       <option value="37.8,-122.467,-8">San Francisco-CA</option>
+       <option value="37.335,-121.894,-8">San Jose-CA</option>
+       <option value="18.423,-66.05,-4">San Juan-PR</option>
+       <option value="35.687,-105.937,-7">Santa Fe-NM</option>
+       <option value="32.083,-81.1,-5">Savannah-GA</option>
+       <option value="47.6,-122.333,-8">Seattle-WA</option>
+       <option value="60.123,-149.418,-9">Seward-AK</option>
+       <option value="42.5,-96.4,-6">Sioux City-IA</option>
+       <option value="43.55,-96.7,-6">Sioux Falls-SD</option>
+       <option value="59.468,-135.302,-9">Skagway-AK</option>
+       <option value="39.8,-90.37,-6">Springfield-IL</option>
+       <option value="38.627,-90.198,-6">St. Louis-IL</option>
+       <option value="43.062,-76.176,-5">Syracuse-NY</option>
+       <option value="30.438,-84.281,-5">Tallahassee-FL</option>
+       <option value="39.048,-95.678,-6">Topeka-KS</option>
+       <option value="40.217,-74.743,-5">Trenton-NJ</option>
+       <option value="32.239,-110.947,-7">Tucson-AZ</option>
+       <option value="61.137,-146.383,-9">Valdez-AK</option>
+       <option value="31.53,-97.146,-6">Waco-TX</option>
+       <option value="38.883,-77.017,-5">Washington-DC</option>
+       <option value="37.692,-97.337,-6">Wichita-KS</option>
+       <option value="39.746,-75.547,-5">Wilmington-DE</option>
+       <option value="36.1,-80.244,-5">Winston-Salem-NC</option>
+       <option value="32.712,-114.636,-7">Yuma-AZ</option>
+     </select>
+     <h2>Or, set your location directly:</h2>
+     <table width="100%" cellpadding="0">
+       <tr><td><b>Latitude:</b>&nbsp;</td><td><input type="text" id="input_latitude" onchange="manual_change();"/></td></tr>
+       <tr><td><b>Longitude:</b>&nbsp;</td><td><input type="text" id="input_longitude" onchange="manual_change();" /></td></tr>
+       <tr><td><b>Timezone:</b> UTC+</td><td><input type="text" id="input_timezone" onchange="manual_change();" /><br /></td></tr>
+     </table>
+     <div>Latitude and longitude are in decimal form while timezone is hours offset from UTC.</div>
+     <h2>Select the time you usually wake up:</h2>
+     <select id="select_risetime" size="1">
+       <option value="2.0">2:00AM</option>
+       <option value="2.5">2:30AM</option>
+       <option value="3.0">3:00AM</option>
+       <option value="3.5">3:30AM</option>
+       <option value="4.0">4:00AM</option>
+       <option value="4.5">4:30AM</option>
+       <option value="5.0">5:00AM</option>
+       <option value="5.5">5:30AM</option>
+       <option value="6.0">6:00AM</option>
+       <option value="6.5">6:30AM</option>
+       <option value="7.0">7:00AM</option>
+       <option value="7.5">7:30AM</option>
+       <option value="8.0">8:00AM</option>
+       <option value="8.5">8:30AM</option>
+       <option value="9.0">9:00AM</option>
+       <option value="9.5">9:30AM</option>
+       <option value="10.0">10:00AM</option>
+       <option value="10.5">10:30AM</option>
+       <option value="11.0">11:00AM</option>
+       <option value="11.0">11:30AM</option>
+     </select>
+     
+     <h2>Click to generate the report:</h2>
+     <input type="button" value="submit" onclick="submit_clicked();" />
+
+
+    </td></tr>
+</table>
+<a rel="license" href="http://creativecommons.org/licenses/by/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" property="dct:title" rel="dct:type">Daylight Savings Calculator</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName"><a href="http://www.ofthat.com">Brandt Redd</a></span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a>.
+</body>
+</html>

@@ -1,0 +1,92 @@
+﻿using System;
+using System.Text;
+
+// This is sample code for converting between Dot Notation and URI notation for Common Core State Standards Identifiers.
+// For more information about the common core and the corresponding IDs, see http://corestandards.org
+// Written by Brandt Redd. Released into the public domain with a CC0 waiver http://creativecommons.org/publicdomain/zero/1.0/
+
+namespace ConvertCcssIds
+{
+
+    static class CcssIdTranslator
+    {
+        const string cCoreStandardsPrefix = "http://corestandards.org/";
+        const string cDotNotationPrefix = "CCSS.";
+        const string cDotNotationMathPrefix = "CCSS.Math";
+        const string cDotNotationMathHSPrefix = "CCSS.Math.Content.HS";
+
+        /// <summary>
+        /// Convert a CCSS ID in Dot Notation to URI form.
+        /// </summary>
+        /// <param name="dotNotation">The Dot Notation string to be converted</param>
+        /// <returns>The resulting URL</returns>
+        public static string DotNotationToUri(string dotNotation)
+        {
+            // For state-specific standards, additional prefixes would need to be supported
+            // and they would correspond with different URL prefixes
+            if (!dotNotation.StartsWith(cDotNotationPrefix, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new ArgumentException(string.Format("Invalid CCSS Dot Notation ID '{0}'", dotNotation));
+            }
+
+            // Special case for math sublettered IDs
+            int len = dotNotation.Length;
+            if ((dotNotation[len-1] >= 'a' && dotNotation[len-1] <= 'z')
+                && (dotNotation[len-2] >= '0' && dotNotation[len-2] <= '9'))
+            {
+                dotNotation = string.Concat(dotNotation.Substring(0, len-1), ".", dotNotation[len-1]);
+            }
+
+            // Special case for high-school math content (as opposed to K-8)
+            if (dotNotation.StartsWith(cDotNotationMathHSPrefix, StringComparison.InvariantCultureIgnoreCase))
+            {
+                int dashPos = dotNotation.IndexOf("-", cDotNotationMathHSPrefix.Length);
+                if (dashPos >= 0)
+                {
+                    dotNotation = string.Concat(dotNotation.Substring(0, dashPos), ".", dotNotation.Substring(dashPos + 1));
+                }
+            }
+
+            return string.Concat(cCoreStandardsPrefix, dotNotation.Substring(cDotNotationPrefix.Length).Replace('.', '/'));
+        }
+
+        /// <summary>
+        /// Convert a CCSS ID in URI form to Dot Notation form
+        /// </summary>
+        /// <param name="uri">The URI to be converted</param>
+        /// <returns>The resulting Dot Notation string.</returns>
+        public static string UriToDotNotation(string uri)
+        {
+            // For state-specific standards, additional prefixes would need to be supported
+            // and they would correspond with different URL prefixes
+            if (!uri.StartsWith(cCoreStandardsPrefix, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new ArgumentException(string.Format("Invalid CCSS URI '{0}'", uri));
+            }
+
+            string dotNotation = string.Concat(cDotNotationPrefix, uri.Substring(cCoreStandardsPrefix.Length).Replace('/', '.'));
+
+            // Special case for high-school math content (as opposed to K-8)
+            if (dotNotation.StartsWith(cDotNotationMathHSPrefix, StringComparison.InvariantCultureIgnoreCase))
+            {
+                int dashPos = dotNotation.IndexOf(".", cDotNotationMathHSPrefix.Length);
+                if (dashPos >= 0)
+                {
+                    dotNotation = string.Concat(dotNotation.Substring(0, dashPos), "-", dotNotation.Substring(dashPos + 1));
+                }
+            }
+
+            // Special case for math sublettered IDs
+            int len = dotNotation.Length;
+            if ((dotNotation[len - 1] >= 'a' && dotNotation[len - 1] <= 'z')
+                && dotNotation[len-2] == '.'
+                && (dotNotation[len - 3] >= '0' && dotNotation[len - 3] <= '9'))
+            {
+                dotNotation = string.Concat(dotNotation.Substring(0, len - 2), dotNotation[len - 1]);
+            }
+
+            return dotNotation;
+        }
+
+    }
+}

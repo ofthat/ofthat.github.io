@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Daylight Savings Report</title>
+    <meta name="copyright" content="Copyright (c) 2007 by Brandt Redd. All Rights Reserved" />
+    <meta name="keywords" content="sunrise, sunset, daylight savings, daylight, savings, calculator, timezone, time zone, GMT, UCT, longitude, latitude." />
+    <script type="text/javascript">
+    <!--
+// Constants
+var c_GraphPixelsPerHour = 15;
+var c_DegToRad = Math.PI/180.0;
+var c_RadToDeg = 180.0/Math.PI;
+var c_SunRadius = 0.53; // Sunradius in degrees
+var c_AirRefr = 34.0/60.0; // atmospheric refraction degrees
+
+// Values are for 2007, Week numbers are zero based with the first partial week of the year being zero
+var c_FirstDayOfYear = 2557;
+var c_OldDaylightStartWeek = 13;
+var c_OldDaylightEndWeek = 43;
+var c_NewDaylightStartWeek = 10;
+var c_NewDaylightEndWeek = 44;
+var c_SundayOffset = 1;
+var p_latitude;
+var p_longitude;
+var p_risetime;
+var p_timezone;
+var p_location;
+
+// ChangeTextById
+var g_HasInnerText = false;
+
+function ChangeTextById(elementId, changeVal)
+{
+    var elem = document.getElementById(elementId);
+
+    if(!g_HasInnerText)
+    {
+        elem.textContent = changeVal;
+    }
+    else
+    {
+        elem.innerText = changeVal;
+    }
+}
+
+function ParseParameters()
+{
+    var params = document.cookie;
+    if (typeof(params) == "string")
+    {
+        var re = new RegExp("dls=([^/]+)/([^/]+)/([^/]+)/([^/]+)/([^/]+)/");
+        var matches = re.exec(params);
+        if (matches != null)
+        {
+            p_latitude = matches[1]-0;    // Coerce to number
+            p_longitude = matches[2]-0;
+            p_risetime = matches[3]-0;
+            p_timezone = matches[4]-0;
+            p_location = matches[5];
+        }
+    }
+    
+    if (typeof(p_latitude) != "number")
+    {
+        // Enter values for New York City
+        p_latitude = 40.733;
+        p_longitude = -73.933;
+        p_risetime = 6.5;
+        p_timezone = -5.0;
+        p_location = "New York City";
+    }
+}
+
+function RunCalculation()
+{
+    g_HasInnerText = (document.body.innerText != undefined) ? true : false;
+
+    ParseParameters();
+    ChangeTextById("span_latitude", p_latitude);
+    ChangeTextById("span_longitude", p_longitude);
+    ChangeTextById("span_risetime",  FormatTime(p_risetime));
+    ChangeTextById("span_timezone",  FormatTimezone(p_timezone));
+    ChangeTextById("span_location",  p_location);
+    
+    // Test uses latitude and longitude of Salt Lake City, UT
+    var ss = CalculateDaylightSavings(p_latitude, p_longitude, p_risetime, p_timezone);
+    ChangeTextById("span_daylightnodst", ss.TotalDaylightNoDST);
+    ChangeTextById("span_daylightolddst", ss.TotalDaylightOldDST);
+    ChangeTextById("span_daylightnewdst", ss.TotalDaylightNewDST);
+    ChangeTextById("span_savedolddst",ss.TotalDaylightOldDST - ss.TotalDaylightNoDST);
+    ChangeTextById("span_savednewdst", ss.TotalDaylightNewDST - ss.TotalDaylightNoDST);
+    ChangeTextById("span_savedadditional", ss.TotalDaylightNewDST - ss.TotalDaylightOldDST);
+    
+    GraphResults(ss.weeks, p_risetime);
+}
+
+function Go()
+{
+    window.navigate("DaylightSavings.htm");
+}
+
+// j2kday is number of days since January 1 2000
+function J2kDay(date)
+{
+    // Assume the date is in localtime. Therefore we must offset by timezone
+    return Math.floor(((date.getTime() - (date.getTimezoneOffset() * 60 * 1000)) / 86400000) - 10957);
+}
+
+function NormalAngle(angle)
+{
+    var a = angle % (2*Math.PI);
+    if (a < 0) a += (2*Math.PI);
+    return a;
+}
+
+function HourAngle(latitude, declin)
+{
+	var fo, dfo;
+	dfo = c_DegToRad * (0.5 * c_SunRadius + c_AirRefr);
+	if (latitude < 0.0) dfo = -dfo;
+	fo = Math.tan(declin + dfo) * Math.tan(latitude * c_DegToRad);
+	if (fo > 0.99999) fo = 1.0; // avoid overflow
+	fo = Math.asin(fo) + Math.PI/2.0;
+	return fo;
+};
+
+// Returns an object with the following properties:
+//   sunrise   - time of the sunrise in hours
+//   sunset    - time of the sunset in hours
+//   daylength - length of the day in hours
+function CalculateSunriseSunset(latitude, longitude, j2kday, timezone)
+{
+	//   mean longitude of the Sun
+	var meanLong = NormalAngle(280.461 * c_DegToRad + .9856474 * c_DegToRad * j2kday);
+
+	//   mean anomaly of the Sun
+	var meanAnomaly = NormalAngle(357.528 * c_DegToRad + .9856003 * c_DegToRad * j2kday);
+
+	//   Ecliptic longitude of the Sun
+	var lambda = NormalAngle(meanLong + 1.915 * c_DegToRad * Math.sin(meanAnomaly) + .02 * c_DegToRad * Math.sin(2 * meanAnomaly));
+
+	//   Obliquity of the ecliptic
+	var obliq = 23.439 * c_DegToRad - .0000004 * c_DegToRad * j2kday;
+	
+	//   Find the RA and DEC of the Sun
+	var alpha = Math.atan2(Math.cos(obliq) * Math.sin(lambda), Math.cos(lambda));
+	var delta = Math.asin(Math.sin(obliq) * Math.sin(lambda));
+
+	// Find the Equation of Time in minutes
+	var LL = meanLong - alpha;
+	if (LL < Math.PI) LL += 2.0*Math.PI;
+	var equation = 1440.0 * (1.0 - LL / Math.PI/2.0);
+	var hourAngle = HourAngle(latitude, delta);
+
+	// Convert angle to hours and minutes
+	var daylen = c_RadToDeg * hourAngle/7.5;
+    if (daylen<0.0001) daylen = 0.0;	// arctic winter
+    
+    // Calculate sunrise and sunset in hours neglecting daylight savings
+    var sunrise = 12.0 - 12.0 * hourAngle/Math.PI + timezone - longitude/15.0 + equation/60.0;
+    var sunset = 12.0 + 12.0 * hourAngle/Math.PI + timezone - longitude/15.0 + equation/60.0;
+    
+    var result = new Object();
+    result.sunrise = sunrise;
+    result.sunset = sunset;
+    result.daylength = daylen;
+    return result;
+}
+
+// Risetime is in hours since midnight
+// Timezone is hours offset from UTC. Western hemisphere is negative
+function CalculateDaylightSavings(latitude, longitude, risetime, timezone)
+{
+    // Array to store informaiton for graph
+    var weeks = new Array();
+    var srss;   // sunrisesunset
+    var dayOfYear;
+    var weekOfYear;
+    var daystart;
+    var daylightNoDST;
+    var daylightOldDST;
+    var daylightNewDST;
+    var totalDaylightNoDST = 0;
+    var totalDaylightOldDST = 0;
+    var totalDaylightNewDST = 0;
+    
+    for (dayOfYear=0; dayOfYear<365; dayOfYear++)
+    {
+        weekOfYear = Math.floor((dayOfYear + c_SundayOffset) / 7)
+        srss = CalculateSunriseSunset(latitude, longitude, c_FirstDayOfYear+dayOfYear, timezone);
+
+        // Calculate regular daylight
+        daystart = (srss.sunrise > risetime) ? srss.sunrise : risetime;
+        daylightNoDST = (srss.sunset > daystart) ? srss.sunset-daystart : 0;
+        
+        // Calculate old DST daylight
+        if (weekOfYear >= c_OldDaylightStartWeek && weekOfYear < c_OldDaylightEndWeek)
+        {
+            daystart = (srss.sunrise > (risetime-1)) ? srss.sunrise : risetime-1;
+            daylightOldDST = (srss.sunset > daystart) ? srss.sunset-daystart : 0;
+        }
+        else
+        {
+            daylightOldDST = daylightNoDST;
+        }
+        
+        // Calculate new DST daylight
+        if (weekOfYear >= c_NewDaylightStartWeek && weekOfYear < c_NewDaylightEndWeek)
+        {
+            daystart = (srss.sunrise > (risetime-1)) ? srss.sunrise : risetime-1;
+            daylightNewDST = (srss.sunset > daystart) ? srss.sunset-daystart : 0;
+        }
+        else
+        {
+            daylightNewDST = daylightNoDST;
+        }
+        
+        totalDaylightNoDST += daylightNoDST;
+        totalDaylightOldDST += daylightOldDST;
+        totalDaylightNewDST += daylightNewDST;
+        
+        // Generate week info if this is the first day of the week
+        if (weekOfYear == Math.floor((dayOfYear + c_SundayOffset) / 7))
+        {
+            weekInfo = new Object();
+            weekInfo.sunrise = srss.sunrise;
+            weekInfo.sunset = srss.sunset;
+            weekInfo.dayofyear = dayOfYear;
+            weeks[weekOfYear] = weekInfo;
+        }
+    }
+    
+    var result = new Object();
+    result.TotalDaylightNoDST = Math.round(totalDaylightNoDST);
+    result.TotalDaylightOldDST = Math.round(totalDaylightOldDST);
+    result.TotalDaylightNewDST = Math.round(totalDaylightNewDST);
+    result.weeks = weeks;
+    return result;
+}
+
+function InsertBar(points, colors, newpoint, newwidth, newcolor)
+{
+    // find the insertion point
+    var endpoint = newpoint+newwidth;
+    var i;
+    for (i=0; i<points.length; i++)
+    {
+        if (newpoint <= points[i]) break;
+    }
+    if (i >= points.length)
+    {
+        points[i] = newpoint;
+        colors[i] = "white";
+        points[i+1] = endpoint;
+        colors[i+1] = newcolor;
+    }
+    else
+    {
+        if (i+1 >= points.length)
+        {
+            // No insertions
+        }
+        else if (points[i] <= endpoint)
+        {
+            // One insertion
+            for (j=points.length-1; j>=i; j--)
+            {
+                points[j+1] = points[j];
+                colors[j+1] = colors[j];
+            }
+        }
+        else // (points[i] > endpoint)
+        {
+            // Two insertions
+            for (j=points.length-1; j>=i; j--)
+            {
+                points[j+2] = points[j];
+                colors[j+2] = colors[j];
+            }
+        }
+        points[i+1] = endpoint;
+        colors[i+1] = newcolor;
+        points[i] = newpoint;
+    }
+}
+
+function GraphResults(array, risetime)
+{
+    var i, j;
+    var div;
+    var img;
+    var points;
+    var colors;
+    var barcount = 0;
+    var dstColor;
+    var rtSTD = Math.round(risetime * c_GraphPixelsPerHour);
+    var rtDST = Math.round((risetime-1) * c_GraphPixelsPerHour);
+    var graphString;
+    
+    var paragraph_graph = document.getElementById("p_graph");    
+    
+    for (i=0; i<52; i++)
+    {
+        week = array[i];
+        
+        // Calculate points
+        points = new Array();
+        colors = new Array();
+        points[0] = Math.round(week.sunrise*c_GraphPixelsPerHour);
+        colors[0] = "black";
+        points[1] = Math.round(week.sunset*c_GraphPixelsPerHour);
+        colors[1] = "white";
+        points[2] = 24 * c_GraphPixelsPerHour;
+        colors[2] = "black";
+
+        // Insert rise bar
+        InsertBar(points, colors, rtSTD-1, 3, "green");
+        
+        // Insert dst bar
+        if (i >= c_NewDaylightStartWeek && i < c_NewDaylightEndWeek)
+        {
+            if (i >= c_OldDaylightStartWeek && i < c_OldDaylightEndWeek)
+            {
+                InsertBar(points, colors, rtDST-1, 3, "blue");
+            }
+            else
+            {
+                InsertBar(points, colors, rtDST-1, 3, "red");
+            }
+        }
+        
+        div = document.createElement("div");
+        
+        for (j=0; j<points.length; j++)
+        {
+            img = document.createElement("img");
+            img.src = colors[j] + ".gif";
+            img.height = 6;
+            img.width = (j>0) ? points[j] - points[j-1] : points[j];
+            div.appendChild(img);
+        }
+        paragraph_graph.appendChild(div);
+     }
+}
+
+function FormatTime(time)
+{
+    var ampm = "am";
+    var hours = Math.floor(time);
+    var minutes = Math.floor((time * 60) % 60);
+    
+    if (hours == 0)
+    {
+        hours = 12;
+    }
+    else if (hours >= 12)
+    {
+        hours = hours-12;
+        ampm = "pm";
+    }
+    if (hours < 10)
+    {
+        hours = "0" + hours;
+    }
+    else
+    {
+        hours = "" + hours;
+    }
+    
+    if (minutes < 10)
+    {
+        minutes = "0" + minutes;
+    }
+    else
+    {
+        minutes = "" + minutes;
+    }
+    
+    return hours + ":" + minutes + ampm;
+}
+
+function FormatTimezone(timezone)
+{
+    var sign = "+";
+    if (timezone < 0)
+    {
+        sign = "-";
+        timezone = -timezone;
+    }
+    return "UTC" + sign + timezone;
+}
+-->
+    </script>
+</head>
+<body onload="RunCalculation()">
+<h2 align="center">Daylight Saving Report for <span id="span_location"></span></h2>
+<div align="center">Latitude=<span id="span_latitude"></span>
+Longitude=<span id="span_longitude"></span>
+Risetime=<span id="span_risetime"></span>
+Timezone=<span id="span_timezone"></span>
+</div>
+<table width="100%">
+<tr>
+  <td width="50%" align="center" valign="top">
+    <p align="center">&nbsp;</p>
+    <table border="3">
+      <tr><th colspan="2">Annual Daylight Hours While Awake</th><th>Hours Saved</th></tr>
+      <tr><td align="left">No Daylight Savings</td><td align="right"><span id="span_daylightnodst"></span></td><td>&nbsp;</td></tr>
+      <tr><td align="left">Old Daylight Savings</td><td align="right"><span id="span_daylightolddst"></span></td><td align="right"><span id="span_savedolddst"></span></td></tr>
+      <tr><td align="left">New Daylight Savings</td><td align="right"><span id="span_daylightnewdst"></span></td><td align="right"><span id="span_savednewdst"></span></td></tr>
+      <tr><td colspan="2" align="center">Additional Daylight Saved</td><td align="right"><span id="span_savedadditional"></span></td></tr>
+    </table>
+    <p>&nbsp;</p>
+    <p><font size="5"><a href="DaylightSavings.htm">Change location or rise time.</a></font></p>
+  </td>
+  <td width="50%" align="center" valign="top">
+    <p align="center"><b>Sunrise and Sunset Diagram</b></p>
+    <p id="p_graph"></p>
+    <table cellpadding="0">
+      <tr><td align="left">Black&nbsp;</td><td align="left">Night</td></tr>
+      <tr><td align="left">White&nbsp;</td><td align="left">Day</td></tr>
+      <tr><td align="left">Green&nbsp;</td><td align="left">Rise Time No Daylight Savings</td></tr>
+      <tr><td align="left">Blue&nbsp;</td><td align="left">Rise Time Old Daylight Savings</td></tr>
+      <tr><td align="left">Red&nbsp;</td><td align="left">Rise Time New Daylight Savings</td></tr>
+    </table>
+    <p align="left">
+    </p>
+  </td>
+</tr>
+</table>
+<h2>Notes:</h2>
+<p>The diagram shows daylight changes over the 52 weeks of the year. The top of the graph is the first week of
+January and the bottom is the last week of December. The horizontal axis is the time of day with the left being
+12:00 midnight and the right being 12:00 the next night. The transition from black to white shows the sunrise
+and sunset.</p>
+<p>The green line is your specified rise time (the time you get out of bed) if no daylight savings is involved.
+The blue line shows how your rise time shifts with the old US daylight savings time. The red lines show how daylight
+savings was extended in the US beginning in 2007. The theory of Daylight Saving Time is that if you get out of bed after
+sunrise then any daylight before you got out of bed is wasted (daylight "lost"). Therefore, if you shift the clock
+and make people get up earlier then they can save as much as an hour of daylight per day by moving it to the evening.
+In the diagram above, any white
+space (daylight) between the daylight saving lines (blue or red) and the green line is daylight "saved."</p>
+<p>The lengthening and shortening of days is more dramatic in northern (or southern) latitudes and less pronounced
+near the Equator. This is why Hawaii doesn't participate in Daylight Savings. Arizona also doesn't participate
+in Daylight Savings though in that case it's more likely a desire for an earlier sunset and relief from the heat.</p>
+<p>The U.S. Energy Policy Act of 2005 included an extension of Daylight Savings Time by four weeks. Three weeks
+were added in March and one in October. Canada decided to follow suit and made a corresponding change.</p>
+<p>For more discussion of the subject, see my <a href="http://www.ofthat.com/2010/11/how-much-daylight-do-you-save.html">OfThat.com blog post</a>.</p>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" property="dct:title" rel="dct:type">Daylight Savings Calculator</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName"><a href="http://www.ofthat.com">Brandt Redd</a></span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a>.
+</body>
+</html>
