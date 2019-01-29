@@ -1,4 +1,6 @@
 timezone: America/Denver
 encoding: utf-8
 markdown: kramdown
+plugins:
+  - jekyll-redirect-from
 domain: ofthat.github.io
