@@ -70,14 +70,14 @@ function submit_clicked()
     var cookie = "dls=" + document.getElementById("input_latitude").value + "/" + document.getElementById("input_longitude").value + "/" + document.getElementById("select_risetime").value + "/" + document.getElementById("input_timezone").value + "/" + loc + "/";
     document.cookie = cookie;
     addr = window.location.toString();
-    slash = addr.indexOf("/", 7);
+    slash = addr.lastIndexOf("/");
     if (slash > 0)
     {
         window.location = addr.substring(0, slash+1) + "DaylightSavingsReport.htm";
     }
     else
     {
-        window.location = "http://www.frictionlessmedia.com/DaylightSavingsReport.htm";
+        window.location = "http://x.ofthat.com/ds/DaylightSavingsReport.htm";
     }
 }
 
