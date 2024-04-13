@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NAEP Visualization</title>
+
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="naep.js"></script>
+
+</head>
+<body>
+    <header>
+    <h1>NAEP Visualization</h1>
+    <p>Originally created by Brandt Redd for CS 6630 at the University of Utah.</p>
+    <nav><a href="#discussion">Discussion</a> | <a href="#project-info">Project Information</a></nav>
+    </header>
+    <div id="columns">
+        <section id="graphcolumn">
+            <h2>National Assessment of Educational Progress</h2>
+            <div>Long-Term Trend (LTT)</div>
+            <div id="graphs"></div>
+            <div id="description">
+                <h3 id="discussion">Discussion</h3>
+                <p>The National Assessment of Educational Progress (NAEP), also known as "The Nation's Report Card" is administered to school samples to measure educational progress in the United States. The Long-Term Trend (LTT) assessment is the oldest of the assessments in the NAEP portfolio with reading data dating back to 1971 and math data back to 1978. Assessments are given at grades 4, 8, and 12. The most recent results in grades 4 and 8 are for 2020 and 2022. For Grade 12 the most recent results are for 2012. More information is at <a href="https://nces.ed.gov/nationsreportcard/">the official NAEP website</a>.</p>
+
+                <p>Use the checkboxes to select which grades, subjects, and demographics to display. Mouse over the graphs to view the detailed scores for each year.</p>
+
+                <p>Standardized assessments scores are reported on arbitrary scales. The NAEP LTT data use a scale from 0 to 500. However, all reported data range between 175 and 375. As there are no units and the scale is arbitrary, it doesn't matter if the visualization is rooted at zero.</p>
+                
+                <p>The NAEP organization assembled committees of expert educators to set achievement levels of Basic, Proficient, and Advanced for each grade and subject. These visualizations show progress relative to those standards.</p>
+
+                <h3 id="project-info">Project Information</h3>
+                <p><strong>Code:</strong> This visualization is created using JavaScript and the <a href="https://d3js.org/">D3.js</a> data visualization library. <a href="https://github.com/ofthat/ofthat.github.io/tree/master/NAEP">Click here for source code on GitHub.</a></p>
+                <p><strong>Data:</strong> <a href="NAEP_LTT.json">Clic here for source data in JSON format.</a></p>
+            </div>
+        </section>
+        <section id="controlcolumn">
+            <div class="controlbox">
+                <table class="graph_select">
+                    <tr><th>Math</th><th>Reading</th><th>&nbsp;</th></tr>
+                    <tr><td><input type="checkbox" id="gr_Math_4"/></td><td><input type="checkbox" id="gr_Reading_4" /></td><th class="row">Grade 4</th></tr>
+                    <tr><td><input type="checkbox" id="gr_Math_8" checked /></td><td><input type="checkbox" id="gr_Reading_8" checked /></td><th class="row">Grade 8</th></tr>
+                    <tr><td><input type="checkbox" id="gr_Math_12" /></td><td><input type="checkbox" id="gr_Reading_12" /></td><th class="row">Grade 12</th></tr>
+                </table>
+                <h4>Demographics</h4>
+
+                <p>
+                    <input type="checkbox" id="chk_All" checked /><label for="chk_All">All Students</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_Female" checked /><label for="chk_Female">Female</label><br/>
+                    <input type="checkbox" id="chk_Male" checked /><label for="chk_Male">Male</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_Northeast" /><label for="chk_Northeast">Northeast Region</label><br/>
+                    <input type="checkbox" id="chk_Midwest" /><label for="chk_Midwest">Midwest Region</label><br/>
+                    <input type="checkbox" id="chk_South" /><label for="chk_South">Southern Region</label><br/>
+                    <input type="checkbox" id="chk_West" /><label for="chk_West">Western Region</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_Disability" /><label for="chk_Disability">With Disability</label><br/>
+                    <input type="checkbox" id="chk_NonDisability" /><label for="chk_NonDisability">Without Disability</label><br/>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_ELL" /><label for="chk_ELL">English-Language Learners</label><br/>
+                    <input type="checkbox" id="chk_NonELL" /><label for="chk_NonELL">Non English-Language Learners</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_White" /><label for="chk_White">White</label><br/>
+                    <input type="checkbox" id="chk_Black" /><label for="chk_Black">Black</label><br/>
+                    <input type="checkbox" id="chk_Hispanic" /><label for="chk_Hispanic">Hispanic</label><br/>
+                    <input type="checkbox" id="chk_AsianPacific" /><label for="chk_AsianPacific">Asian and Pacific Islander</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_EconDisadvantage" /><label for="chk_EconDisadvantage">Economically Disadvantaged</label><br/>
+                    <input type="checkbox" id="chk_NotEconDisadvantage" /><label for="chk_NotEconDisadvantage">Not Economically Disadvantaged</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_City" /><label for="chk_City">City</label><br/>
+                    <input type="checkbox" id="chk_Suburb" /><label for="chk_Suburb">Suburb</label><br/>
+                    <input type="checkbox" id="chk_Town" /><label for="chk_Town">Town</label><br/>
+                    <input type="checkbox" id="chk_Rural" /><label for="chk_Rural">Rural</label>
+                </p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

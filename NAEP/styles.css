@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+:root {
+    font-family: 'Roboto', sans-serif;
+}
+
+h2 {
+    margin: 1rem 0 0 0;
+}
+
+h3 {
+    margin: 1rem 0 0 0;
+}
+
+#columns {
+    display: flex;
+    flex-flow: row wrap-reverse;
+    justify-content: center;
+}
+
+#graphcolumn {
+    flex-grow: 1;
+}
+
+#graphs {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+#description {
+    max-width: 35em;
+}
+
+.graph {
+    width: 50%;
+}
+
+@media screen and (max-width: 1280px) {
+    #graphcolumn {
+        max-width: 40em;
+    }
+    .graph {
+        width: 100%;
+    }
+
+}
+
+.controlbox {
+    border: 1px solid black;
+    padding: 0.5em;
+}
+
+th.row {
+    text-align: left;
+}
+
+.graph_select td {
+    text-align: center;
+}
+
+#controls h4 {
+    margin: 1em 0 0.5em 0;
+}
+
+#controls p {
+    margin: 0 0 0.5em 0;
+}
